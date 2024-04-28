@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 class trainer(object):
     """
-    Trainer class 
+    
     """
     def __init__(self, model, optimizer, train_loader, valid_loader, num_epochs: int = 50):
         self.model = model
@@ -34,9 +34,7 @@ class trainer(object):
             for batch_idx, data in enumerate(self.train_loader):
                 self.optimizer.zero_grad()
                 x, _ = data
-                x = x.view(x.size(0), -1)
                 x_recon, mu, logvar = self.model(x)
-                # print(x-x_recon)
                 train_loss = self.model.loss_function(x, x_recon, mu, logvar)
                 train_loss.backward()
                 self.optimizer.step()
@@ -44,7 +42,6 @@ class trainer(object):
             with torch.no_grad():
                 for batch_idx, data in enumerate(self.valid_loader):
                     x, _ = data
-                    x = x.view(x.size(0), -1)
                     x_recon, mu, logvar = self.model(x)
                     valid_loss = self.model.loss_function(x, x_recon, mu, logvar)
             self.valid_losses.append(valid_loss.item())
@@ -62,14 +59,4 @@ class trainer(object):
     def save(self):
         torch.save(self.model.state_dict(), 'vae.pt')
 
-
-
-
-
-# # Example usage
-# input_dim = 784  # MNIST image size
-# latent_dim = 20  # Latent dimension size
-# num_epochs = 50
-# model = vae(input_dim, latent_dim)
-# optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
