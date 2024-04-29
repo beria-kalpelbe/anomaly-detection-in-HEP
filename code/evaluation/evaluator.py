@@ -35,7 +35,7 @@ class evaluator(object):
                 score = torch.sum(torch.pow(x_recon - data, 2)) / BATCH_SIZE
                 scores.append(score)
         self.scores = torch.tensor(scores)
-        # self.scores = (scores - scores.min()) / (scores.max() - scores.min())
+        self.scores = (self.scores - self.scores.min()) / (self.scores.max() - self.scores.min())
         self.sg_scores = self.scores[self.labels == 1]
         self.bk_scores = self.scores[self.labels == 0]
     
