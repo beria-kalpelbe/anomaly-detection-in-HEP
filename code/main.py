@@ -11,13 +11,20 @@ import os
 
 
 def main():
-    data = dataset(data_file='/home/beria/Documents/anomaly-detection/data.csv')
-    data_train = dataset(data_file='/home/beria/Documents/anomaly-detection/data.csv')
-    data_valid = dataset(data_file='/home/beria/Documents/anomaly-detection/data.csv')
-    data_test = dataset(data_file='/home/beria/Documents/anomaly-detection/data.csv')
+    data = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
+    data_train = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
+    data_valid = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
+    data_test = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
     
-    data_train.data, d = train_test_split(data.data, test_size=0.2, random_state=42)
-    data_valid.data, data_test.data = train_test_split(d, test_size=0.5, random_state=39)
+    # data = dataset(sg_files=['/home/beria/Documents/anomaly-detection/500GeV_n3_events_100k_1mm_pileup.h5',
+    #                         '/home/beria/Documents/anomaly-detection/100GeV_n3_events_100k_1mm_pileup.h5'],
+    #               bkg_files=['/home/beria/Documents/anomaly-detection/QCD_multijet_events_200k_pileup.h5'])
+    # data_train = data
+    # data_valid = data
+    # data_test = data
+    data_train.data, d, data_train.labels, labels = train_test_split(data.data, data.labels, test_size=0.2, random_state=42)
+    data_valid.data, data_test.data, data_valid.labels, data_test.labels = train_test_split(d, labels, test_size=0.5, random_state=39)
+  
     with open('code/utils/hyperparameters.json') as f:
         hyperparameters = json.load(f)
 
@@ -42,7 +49,8 @@ def main():
                             num_epochs=num_epochs)
         trainer_vae.run()
         trainer_vae.plot_losses()
-    evaluator_vae = evaluator(model=model_vae, test_data=data_test.data)
+
+    evaluator_vae = evaluator(model=model_vae, test_data=data_test)
     evaluator_vae.run()
     evaluator_vae.describe_scores()
     

@@ -1,9 +1,9 @@
 {
-    "BATCH_SIZE": 128, 
-    "EPOCHS": 100,
+    "BATCH_SIZE": 256,
+    "EPOCHS": 50,
     "LEARNING_RATE": 1e-4,
-    "DROPOU_RATE": 0.5,
-    "LATENT_DIM": 5,
+    "DROPOU_RATE": 0.1,
+    "LATENT_DIM": 3,
     "BETA": 0.2
 }
 
