@@ -44,7 +44,7 @@ class trainer(object):
             self.model.train()
             for batch_idx, data in enumerate(self.train_loader):
                 self.optimizer.zero_grad()
-                x, _ = data
+                x = data
                 inputs = x.to(device)
                 x_recon, mu, logvar = self.model(inputs)
                 train_loss = self.model.loss_function(inputs, x_recon, mu, logvar)
@@ -56,7 +56,7 @@ class trainer(object):
             self.model.eval()
             with torch.no_grad():
                 for batch_idx, data in enumerate(self.valid_loader):
-                    x, _ = data
+                    x = data
                     inputs = x.to(device)
                     x_recon, mu, logvar = self.model(inputs)
                     valid_loss = self.model.loss_function(inputs, x_recon, mu, logvar)

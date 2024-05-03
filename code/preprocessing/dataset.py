@@ -42,13 +42,13 @@ class dataset(Dataset):
                 d = self.get_data_from_h5(file_dir)
                 self.labels = np.concatenate((self.labels,np.ones(d.shape[0])))
                 data = np.append(data,d)
-                print(f'Signal {idx}')
+                print(f'Signal file: {file_dir}')
                     
             for idx,file_dir in enumerate(bkg_files):
                 d = self.get_data_from_h5(file_dir)
                 self.labels = np.concatenate((self.labels,np.zeros(d.shape[0])))
                 data = np.append(data,d)
-                print(f'Background {idx}')
+                print(f'Background file: {file_dir}')
             data = np.array([list(element) for element in data.tolist()])
         else:
             raise ValueError(f"data_file must be a .h5 or .csv file, not {data_file}")
@@ -58,7 +58,6 @@ class dataset(Dataset):
         self.num_features = len(self.data[0])
         self.data = torch.tensor(self.data, dtype=torch.float32)
         self.split_data()
-        print(self.data.shape)
         
     def get_data_from_h5(self, file_dir:str, bucket_name:str = 'cuda-programming-406720'):       
         client = storage.Client()
