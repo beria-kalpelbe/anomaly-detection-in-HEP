@@ -70,8 +70,20 @@ class dataset(Dataset):
         return data
     
     def split_data(self):
-        self.data_train, data, self.train_labels, labels = train_test_split(self.data, self.labels, test_size=0.2, random_state=42)
-        self.data_valid, self.data_test, self.valid_labels, self.test_labels = train_test_split(data, labels, test_size=0.5, random_state=39)
+        indices = np.array(range(self.data.shape[0]))
+        np.random.seed(39)
+        indices = np.random.shuffle(indices)
+        train_size = int(0.8*self.data.shape[0])
+        valid_size  = int(0.1*self.data.shape[0])
+        indices_train = indices[:train_size]
+        indices_valid = indices[(train_size+1):(train_size + valid_size)]
+        indices_test = indices[(train_size + valid_size+1):]
+        self.data_train = self.data[indices_train,:]
+        self.data_valid = self.data[indices_valid,:]
+        self.data_test = self.data[indices_test,:]
+        
+        # self.data_train, data, self.train_labels, labels = train_test_split(self.data, self.labels, test_size=0.2, random_state=42)
+        # self.data_valid, self.data_test, self.valid_labels, self.test_labels = train_test_split(data, labels, test_size=0.5, random_state=39)
     
 
     def __len__(self):
