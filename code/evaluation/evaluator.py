@@ -29,8 +29,11 @@ class evaluator(object):
         """
         scores = []
         self.model.eval()
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print('Device:', device)
         with torch.no_grad():
             for idx, data in enumerate(self.test_data):
+                data = data.to(device)
                 x_recon, mu, logvar = self.model(data)
                 score = torch.sum(torch.pow(x_recon - data, 2)) / BATCH_SIZE
                 scores.append(score)
@@ -68,7 +71,7 @@ class evaluator(object):
         plt.xlabel('Anomaly score')
         plt.legend()
         plt.savefig('docs/scores-distributions.pdf', format='pdf')
-        plt.show()
+        # plt.show()
         
     def roc_curve(self):
         """
