@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import h5py
 from numpy.lib.recfunctions import append_fields
-
+from sklearn.model_selection import train_test_split
 
 
 import h5py
@@ -57,6 +57,7 @@ class dataset(Dataset):
         self.data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
         self.num_features = len(self.data[0])
         self.data = torch.tensor(self.data, dtype=torch.float32)
+        self.split_data()
         print(self.data.shape)
         
     def get_data_from_h5(self, file_dir:str, bucket_name:str = 'cuda-programming-406720'):       
@@ -66,9 +67,13 @@ class dataset(Dataset):
         file_contents = BytesIO(blob.download_as_string())
         with h5py.File(file_contents, 'r') as f:
             dataset = f['Track']
-            data = dataset[:100000]
+            data = dataset[:100]
         return data
-        
+    
+    def split_data(self):
+        self.data_train, data, self.train_labels, labels = train_test_split(self.data, self.labels, test_size=0.2, random_state=42)
+        self.data_valid, self.data_test, self.valid_labels, self.test_labels = train_test_split(data, labels, test_size=0.5, random_state=39)
+    
 
     def __len__(self):
         return len(self.data)

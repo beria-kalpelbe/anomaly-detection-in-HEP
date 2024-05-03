@@ -17,10 +17,10 @@ class evaluator(object):
         model (nn.Module): The model to evaluate.
         test_data (torch.tensor): The test data.
     """
-    def __init__(self, model, test_data):
+    def __init__(self, model, test_data, labels):
         self.model = model
-        self.test_data = test_data.data
-        self.labels = test_data.labels
+        self.test_data = test_data
+        self.labels = labels
         self.scores = None
         
     def run(self):
