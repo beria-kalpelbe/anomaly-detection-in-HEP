@@ -3,6 +3,8 @@ import json
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 import numpy as np
+from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix, accuracy_score
+import seaborn as sns
 
 with open('code/utils/hyperparameters.json') as f:
     hyperparameters = json.load(f)
@@ -27,10 +29,12 @@ class evaluator(object):
         """
         Evaluate the model on the test data.
         """
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print('Device: ', device)
+        self.model.to(device)
         scores = []
         self.model.eval()
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print('Device:', device)
+
         with torch.no_grad():
             for idx, data in enumerate(self.test_data):
                 data = data.to(device)
@@ -71,13 +75,33 @@ class evaluator(object):
         plt.xlabel('Anomaly score')
         plt.legend()
         plt.savefig('docs/scores-distributions.pdf', format='pdf')
-        # plt.show()
+        plt.show()
         
-    def roc_curve(self):
+    def roc_curve(self, type_model:str="bdt"):
         """
         Plot the ROC curve.
         """
-        
-        pass
+        if type_model == "bdt":
+            probs = self.model.predict_proba(self.test_data)
+            fpr, tpr, thresholds = roc_curve(self.labels, probs[:,1])
+            roc_auc = roc_auc_score(self.labels, probs[:,1])
+            plt.plot(fpr, tpr, label='ROC curve (AUC = %0.2f)' % roc_auc)
+            plt.savefig(f'docs/roc-curve-{type_model}.pdf', format='pdf')
+            plt.show()
+    
+    def confusion_matrix(self, type_model:str="bdt"):
+        """
+        Plot the confusion matrix.
+        """
+        y_pred = self.model.predict(self.test_data)
+        cm = confusion_matrix(self.labels, y_pred)
+        accuracy = accuracy_score(self.labels, y_pred)*100
+        plt.figure()
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+        plt.xlabel("Predicted labels")
+        plt.ylabel("True labels")
+        plt.title("Confusion Matrix (Accuracy: {:.2f}%)".format(accuracy))
+        plt.savefig(f'docs/cm-{type_model}.pdf', format='pdf')
+        plt.show()
         
                 

@@ -42,20 +42,22 @@ class trainer(object):
 
             # Training
             self.model.train()
-            for batch_idx, data in enumerate(self.train_loader):
+            batch = 0
+            for inputs in self.train_loader:
                 self.optimizer.zero_grad()
-                x = data
-                inputs = x.to(device)
-                x_recon, mu, logvar = self.model(inputs)
-                train_loss = self.model.loss_function(inputs, x_recon, mu, logvar)
+                inputs = inputs.to(device)
+                inputs_recon, mu, logvar = self.model(inputs)
+                inputs_recon, mu, logvar = inputs_recon.to(device), mu.to(device), logvar.to(device)
+                train_loss = self.model.loss_function(inputs, inputs_recon, mu, logvar)
                 train_loss.backward()
                 self.optimizer.step()
                 epoch_train_loss += train_loss.item()
+                batch += 1
 
             # Validation
             self.model.eval()
             with torch.no_grad():
-                for batch_idx, data in enumerate(self.valid_loader):
+                for data in self.valid_loader:
                     x = data
                     inputs = x.to(device)
                     x_recon, mu, logvar = self.model(inputs)
@@ -69,8 +71,8 @@ class trainer(object):
             self.valid_losses.append(epoch_valid_loss)
 
             time_elapsed = datetime.now() - starting_time
-            print('Epoch: {}, Train loss: {:.4f}, Valid loss: {:.4f}, Time elapsed (hh:mm:ss.ms) {}'.format(
-                    epoch, epoch_train_loss, epoch_valid_loss, time_elapsed
+            print('Epoch: {}, Batch Size: {}, Train loss: {:.4f}, Valid loss: {:.4f}, Time elapsed (hh:mm:ss.ms) {}'.format(
+                    epoch,batch ,epoch_train_loss, epoch_valid_loss, time_elapsed
                 ))
 
     
@@ -79,7 +81,7 @@ class trainer(object):
         plt.plot(self.valid_losses, label='Validation loss')
         plt.legend()
         plt.savefig('docs/losses.pdf', format='pdf')
-        # plt.show()
+        plt.show()
     
     def save(self):
         torch.save(self.model.state_dict(), 'vae.pt')

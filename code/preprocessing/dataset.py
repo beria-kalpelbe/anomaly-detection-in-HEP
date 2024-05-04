@@ -54,7 +54,8 @@ class dataset(Dataset):
             raise ValueError(f"data_file must be a .h5 or .csv file, not {data_file}")
         min_vals = np.min(data, axis=0)
         max_vals = np.max(data, axis=0)
-        self.data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
+        # self.data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
+        self.data = data
         self.num_features = len(self.data[0])
         self.data = torch.tensor(self.data, dtype=torch.float32)
         self.split_data()
@@ -66,21 +67,24 @@ class dataset(Dataset):
         file_contents = BytesIO(blob.download_as_string())
         with h5py.File(file_contents, 'r') as f:
             dataset = f['Track']
-            data = dataset[:100]
+            data = dataset[:100000]
         return data
     
     def split_data(self):
         indices = np.array(range(self.data.shape[0]))
         np.random.seed(39)
-        indices = np.random.shuffle(indices)
+        np.random.shuffle(indices)
         train_size = int(0.8*self.data.shape[0])
         valid_size  = int(0.1*self.data.shape[0])
         indices_train = indices[:train_size]
         indices_valid = indices[(train_size+1):(train_size + valid_size)]
         indices_test = indices[(train_size + valid_size+1):]
         self.data_train = self.data[indices_train,:]
+        self.labels_train = self.labels[indices_train]
         self.data_valid = self.data[indices_valid,:]
+        self.labels_valid = self.labels[indices_valid]
         self.data_test = self.data[indices_test,:]
+        self.labels_test = self.labels[indices_test]
         
         # self.data_train, data, self.train_labels, labels = train_test_split(self.data, self.labels, test_size=0.2, random_state=42)
         # self.data_valid, self.data_test, self.valid_labels, self.test_labels = train_test_split(data, labels, test_size=0.5, random_state=39)
