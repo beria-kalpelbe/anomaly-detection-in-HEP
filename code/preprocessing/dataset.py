@@ -43,7 +43,7 @@ class dataset(Dataset):
                 self.labels = np.concatenate((self.labels,np.ones(d.shape[0])))
                 data = np.append(data,d)
                 print(f'Signal file: {file_dir}')
-            self.sg_data = data
+            self.sg_data = np.array([list(element) for element in data.tolist()])
             for idx,file_dir in enumerate(bkg_files):
                 d = self.get_data_from_h5(file_dir)
                 self.labels = np.concatenate((self.labels,np.zeros(d.shape[0])))
