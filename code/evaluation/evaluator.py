@@ -5,6 +5,8 @@ from scipy.stats import gaussian_kde
 import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix, accuracy_score
 import seaborn as sns
+from sklearn.metrics import classification_report
+
 
 with open('code/utils/hyperparameters.json') as f:
     hyperparameters = json.load(f)
@@ -34,17 +36,20 @@ class evaluator(object):
         self.model.to(device)
         scores = []
         self.model.eval()
-
+        self.model.requires_grad_(False)
+        self.mu = []
         with torch.no_grad():
             for idx, data in enumerate(self.test_data):
                 data = data.to(device)
                 x_recon, mu, logvar = self.model(data)
+                self.mu.append(mu)
                 score = torch.sum(torch.pow(x_recon - data, 2)) / BATCH_SIZE
                 scores.append(score)
         self.scores = torch.tensor(scores)
         self.scores = (self.scores - self.scores.min()) / (self.scores.max() - self.scores.min())
         self.sg_scores = self.scores[self.labels == 1]
         self.bk_scores = self.scores[self.labels == 0]
+        self.mu = np.array(self.mu)
     
     def get_scores(self):
         """
@@ -85,7 +90,10 @@ class evaluator(object):
             probs = self.model.predict_proba(self.test_data)
             fpr, tpr, thresholds = roc_curve(self.labels, probs[:,1])
             roc_auc = roc_auc_score(self.labels, probs[:,1])
-            plt.plot(fpr, tpr, label='ROC curve (AUC = %0.2f)' % roc_auc)
+            plt.plot(fpr, tpr)
+            plt.title('ROC curve (AUC = %0.2f)' % roc_auc)
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
             plt.savefig(f'docs/roc-curve-{type_model}.pdf', format='pdf')
             plt.show()
     
@@ -96,12 +104,33 @@ class evaluator(object):
         y_pred = self.model.predict(self.test_data)
         cm = confusion_matrix(self.labels, y_pred)
         accuracy = accuracy_score(self.labels, y_pred)*100
-        plt.figure()
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+        plt.figure(figsize=(8,6))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Background", "Signal"], yticklabels=["Background", "Signal"])
         plt.xlabel("Predicted labels")
         plt.ylabel("True labels")
         plt.title("Confusion Matrix (Accuracy: {:.2f}%)".format(accuracy))
         plt.savefig(f'docs/cm-{type_model}.pdf', format='pdf')
         plt.show()
         
-                
+    def event_embedding(self):
+        """
+        Plot the event embedding.
+        """
+        plt.scatter(self.mu[:,0], self.mu[:,1], c=self.labels, cmap='viridis')
+        plt.legend()
+        plt.savefig('docs/event-embedding.pdf', format='pdf')
+        plt.show()
+    
+    def classification_report(self, type_model:str="bdt"):
+        """
+        Plot the classification report.
+        """
+        y_pred = self.model.predict(self.test_data)
+        report = classification_report(self.labels, y_pred)
+        
+        with open('docs/bdt-classification_report.txt', 'w') as f:
+            f.write(report)
+        
+        print(report)
+        
+

@@ -44,18 +44,18 @@ class dataset(Dataset):
                 data = np.append(data,d)
                 print(f'Signal file: {file_dir}')
                     
-            for idx,file_dir in enumerate(bkg_files):
-                d = self.get_data_from_h5(file_dir)
-                self.labels = np.concatenate((self.labels,np.zeros(d.shape[0])))
-                data = np.append(data,d)
-                print(f'Background file: {file_dir}')
+            # for idx,file_dir in enumerate(bkg_files):
+            #     d = self.get_data_from_h5(file_dir)
+            #     self.labels = np.concatenate((self.labels,np.zeros(d.shape[0])))
+            #     data = np.append(data,d)
+            #     print(f'Background file: {file_dir}')
             data = np.array([list(element) for element in data.tolist()])
         else:
             raise ValueError(f"data_file must be a .h5 or .csv file, not {data_file}")
         min_vals = np.min(data, axis=0)
         max_vals = np.max(data, axis=0)
-        # self.data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
-        self.data = data
+        self.data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
+        # self.data = data
         self.num_features = len(self.data[0])
         self.data = torch.tensor(self.data, dtype=torch.float32)
         self.split_data()

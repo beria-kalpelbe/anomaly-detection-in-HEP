@@ -77,11 +77,11 @@ class VAE(nn.Module):
     def __init__(self, input_dim, latent_dim):
         super(VAE, self).__init__()
 
-        self.fc1 = nn.Linear(in_features=input_dim, out_features=64)
-        self.fc21 = nn.Linear(in_features=64, out_features=latent_dim)
-        self.fc22 = nn.Linear(in_features=64, out_features=latent_dim)
-        self.fc3 = nn.Linear(in_features=latent_dim, out_features=64)
-        self.fc4 = nn.Linear(in_features=64, out_features=input_dim)
+        self.fc1 = nn.Linear(in_features=input_dim, out_features=512)
+        self.fc21 = nn.Linear(in_features=512, out_features=latent_dim)
+        self.fc22 = nn.Linear(in_features=512, out_features=latent_dim)
+        self.fc3 = nn.Linear(in_features=latent_dim, out_features=512)
+        self.fc4 = nn.Linear(in_features=512, out_features=input_dim)
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh()
         self.dropout = nn.Dropout(DROPOUT_RATE)
@@ -109,6 +109,6 @@ class VAE(nn.Module):
         return self.decode(z), mu, logvar
 
     def loss_function(self, recon_x, x, mu, logvar):
-        recon_loss = torch.sum(torch.pow(recon_x - x, 2)) / BATCH_SIZE
-        kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / BATCH_SIZE
-        return recon_loss + beta*kl_loss
+        recon_loss = torch.mean(torch.pow(recon_x - x, 2)) #/ BATCH_SIZE
+        kl_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp()) #/ BATCH_SIZE
+        return (1-beta)*recon_loss + beta*kl_loss
