@@ -47,15 +47,15 @@ class evaluator(object):
                 scores.append(score)
         self.scores = torch.tensor(scores)
         self.scores = (self.scores - self.scores.min()) / (self.scores.max() - self.scores.min())
-        self.sg_scores = self.scores[self.labels == 1]
-        self.bk_scores = self.scores[self.labels == 0]
+        # self.sg_scores = self.scores[self.labels == 1]
+        # self.bk_scores = self.scores[self.labels == 0]
         self.mu = np.array(self.mu)
     
     def get_scores(self):
         """
         Return the scores of the test data.
         """
-        return self.scores, self.sg_scores, self.bk_scores
+        return self.scores#, self.sg_scores, self.bk_scores
     
     def describe_scores(self):
         """

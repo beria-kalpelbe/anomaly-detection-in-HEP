@@ -2,6 +2,7 @@ from preprocessing.dataset import dataset
 from torch.utils.data import DataLoader
 from training.trainer import trainer
 from models.vae import VAE
+from models.ode import ode
 from evaluation.evaluator import evaluator
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
@@ -25,8 +26,8 @@ def main():
     # data_test = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
 
     
-    data = dataset(sg_files=['QCD_LLP_samples/h5-files/500GeV_n3_events_100k_1mm_pileup.h5',
-                            'QCD_LLP_samples/h5-files/100GeV_n3_events_100k_1mm_pileup.h5'],
+    data = dataset(sg_files=['QCD_LLP_samples/h5-files/500GeV_n3_events_100k_1mm_pileup.h5'],
+                            # 'QCD_LLP_samples/h5-files/100GeV_n3_events_100k_1mm_pileup.h5'],
                   bkg_files=['QCD_LLP_samples/h5-files/QCD_multijet_events_200k_pileup.h5'])
   
     with open('code/utils/hyperparameters.json') as f:
@@ -73,6 +74,13 @@ def main():
         bdt_evaluator.roc_curve()
         bdt_evaluator.confusion_matrix()
         bdt_evaluator.classification_report()
+    
+    if sys.argv[1] == 'ode':
+        ode_model = ode(sg_data = data.sg_data, bkg_data=data.bkg_data)
+        ode_model.run()
+        ode_model.roc_curve(data)
+        
+        
            
         
         

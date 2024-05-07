@@ -26,7 +26,7 @@ class trainer(object):
 
     def run(self):
         self.train()
-        self.save()
+        # self.save()
 
     def train(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -87,3 +87,18 @@ class trainer(object):
         torch.save(self.model.state_dict(), 'vae.pt')
 
 
+
+class bdt_trainer(object):
+    def __init__(self,model, optimizer, train_loader, valid_loader, num_epochs: int = 50):
+        self.model = model
+        self.optimizer = optimizer
+        self.train_loader = train_loader
+        self.valid_loader = valid_loader
+        self.num_epochs = num_epochs
+        
+    def train(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print('Device: ', device)
+        
+        
+        
