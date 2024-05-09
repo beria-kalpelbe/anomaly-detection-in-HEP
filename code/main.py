@@ -20,15 +20,15 @@ def main():
     if len(sys.argv) != 2:
         raise("Usage: python main.py model-name (vae, ode, bdt)")
     
-    data = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
+    # data = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
     # data_train = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
     # data_valid = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
     # data_test = dataset(data_file='/home/beria/Documents/anomaly-detection/data-clf.csv')
 
     
-    # data = dataset(sg_files=['QCD_LLP_samples/h5-files/500GeV_n3_events_100k_1mm_pileup.h5'],
-    #                         # 'QCD_LLP_samples/h5-files/100GeV_n3_events_100k_1mm_pileup.h5'],
-    #               bkg_files=['QCD_LLP_samples/h5-files/QCD_multijet_events_200k_pileup.h5'])
+    data = dataset(data_file='QCD_LLP_samples/root-files/qcd_100k.root',
+                    sg_files=['QCD_LLP_samples/h5-files/500GeV_n3_events_100k_1mm_pileup.h5', 'QCD_LLP_samples/h5-files/100GeV_n3_events_100k_1mm_pileup.h5'],
+                    bkg_files=['QCD_LLP_samples/h5-files/QCD_multijet_events_200k_pileup.h5'])
   
     with open('code/utils/hyperparameters.json') as f:
         hyperparameters = json.load(f)

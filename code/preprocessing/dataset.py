@@ -33,7 +33,7 @@ class dataset(Dataset):
             data = np.genfromtxt(data_file, delimiter=',', skip_header=1)
             self.labels = data[:,-1]
             data = data[:,:-1]
-        elif sg_files[0].endswith(".h5") and bkg_files[0].endswith(".h5"):
+        if sg_files[0].endswith(".h5") and bkg_files[0].endswith(".h5"):
             print("Using h5 files")
             dtype = [('Track.PT', '<f4'), ('Track.Eta', '<f4'), ('Track.Phi', '<f4'), ('Track.D0', '<f4'), ('Track.DZ', '<f4')]
             data = np.array([], dtype=dtype)
@@ -51,15 +51,30 @@ class dataset(Dataset):
                 print(f'Background file: {file_dir}')
             self.bkg_data = d
             data = np.array([list(element) for element in data.tolist()])
+            self.test_data = data
+        if data_file[0].endswith(".root"):
+            print("Using root files")
+            data_train = self.get_data_from_root(data_file)
+            features = ['Track.PT', 'Track.Eta', 'Track.Phi', 'Track.D0', 'Track.DZ']
+            data_ = []
+            for i in range(5):
+                d = data_train['Track'][features[i]].array().tolist()
+                data_.append(d)
+            data_ = np.array(data_)
+            del data_train
+            self.data_train = data_
         else:
             raise ValueError(f"data_file must be a .h5 or .csv file, not {data_file}")
+        self.data_train = self.normalize(self.data_train)
+        self.data_train = torch.tensor(self.data_train, dtype=torch.float32)
+        self.data_test = self.normalize(self.data_test)
+        self.split_data()
+        
+    def normalize(self, data):
         min_vals = np.min(data, axis=0)
         max_vals = np.max(data, axis=0)
-        self.data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
-        # self.data = data
-        self.num_features = len(self.data[0])
-        self.data = torch.tensor(self.data, dtype=torch.float32)
-        self.split_data()
+        data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
+        return data
         
     def get_data_from_h5(self, file_dir:str, bucket_name:str = 'cuda-programming-406720'):       
         client = storage.Client()
@@ -71,21 +86,30 @@ class dataset(Dataset):
             data = dataset[:1000]
         return data
     
+    def get_data_from_root(self, file_dir:str, bucket_name:str = 'cuda-programming-406720'):
+        client = storage.Client()
+        bucket = client.get_bucket(bucket_name)
+        blob = bucket.blob(file_dir)
+        file_contents = BytesIO(blob.download_as_string())
+        tree = uproot.open(file_contents)
+        data = tree['Delphes']
+        return data
+    
     def split_data(self):
-        indices = np.array(range(self.data.shape[0]))
+        indices = np.array(range(self.data_train.shape[0]))
         np.random.seed(39)
         np.random.shuffle(indices)
-        train_size = int(0.8*self.data.shape[0])
-        valid_size  = int(0.1*self.data.shape[0])
+        train_size = int(0.8*self.data_train.shape[0])
+        valid_size  = int(0.2*self.data_train.shape[0])
         indices_train = indices[:train_size]
         indices_valid = indices[(train_size+1):(train_size + valid_size)]
-        indices_test = indices[(train_size + valid_size+1):]
-        self.data_train = self.data[indices_train,:]
-        self.labels_train = self.labels[indices_train]
-        self.data_valid = self.data[indices_valid,:]
-        self.labels_valid = self.labels[indices_valid]
-        self.data_test = self.data[indices_test,:]
-        self.labels_test = self.labels[indices_test]
+        # indices_test = indices[(train_size + valid_size+1):]
+        self.data_train = self.data_train[indices_train,:]
+        # self.labels_train = self.labels[indices_train]
+        self.data_valid = self.data_train[indices_valid,:]
+        # self.labels_valid = self.labels[indices_valid]
+        # self.data_test = self.data_train[indices_test,:]
+        # self.labels_test = self.labels[indices_test]
         
         # self.data_train, data, self.train_labels, labels = train_test_split(self.data, self.labels, test_size=0.2, random_state=42)
         # self.data_valid, self.data_test, self.valid_labels, self.test_labels = train_test_split(data, labels, test_size=0.5, random_state=39)
