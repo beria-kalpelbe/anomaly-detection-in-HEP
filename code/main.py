@@ -38,8 +38,8 @@ def main():
     num_epochs = hyperparameters['EPOCHS']
     latent_dim = hyperparameters['LATENT_DIM']
     
-    train_loader = DataLoader(data.data_train, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
-    valid_loader = DataLoader(data.data_valid, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+    train_loader = DataLoader(torch.tensor(data.data_train, dtype=torch.float32), batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+    valid_loader = DataLoader(torch.tensor(data.data_valid,dtype=torch.float32), batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
 
     if sys.argv[1] == 'vae':
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

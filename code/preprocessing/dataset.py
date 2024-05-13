@@ -52,9 +52,10 @@ class dataset(Dataset):
             self.bkg_data = d
             data = np.array([list(element) for element in data.tolist()])
             self.test_data = data
-        if data_file[0].endswith(".root"):
-            print("Using root files")
+        if data_file.endswith(".root"):
+            print("Using root files:", end=" ")
             data_train = self.get_data_from_root(data_file)
+            print(data_file)
             features = ['Track.PT', 'Track.Eta', 'Track.Phi', 'Track.D0', 'Track.DZ']
             data_ = []
             for i in range(5):
@@ -66,7 +67,7 @@ class dataset(Dataset):
         else:
             raise ValueError(f"data_file must be a .h5 or .csv file, not {data_file}")
         self.data_train = self.normalize(self.data_train)
-        self.data_train = torch.tensor(self.data_train, dtype=torch.float32)
+        self.data_train = np.array(self.data_train)
         self.data_test = self.normalize(self.data_test)
         self.split_data()
         
@@ -83,7 +84,7 @@ class dataset(Dataset):
         file_contents = BytesIO(blob.download_as_string())
         with h5py.File(file_contents, 'r') as f:
             dataset = f['Track']
-            data = dataset[:1000]
+            data = dataset[:10]
         return data
     
     def get_data_from_root(self, file_dir:str, bucket_name:str = 'cuda-programming-406720'):
@@ -93,7 +94,7 @@ class dataset(Dataset):
         file_contents = BytesIO(blob.download_as_string())
         tree = uproot.open(file_contents)
         data = tree['Delphes']
-        return data
+        return data[:10]
     
     def split_data(self):
         indices = np.array(range(self.data_train.shape[0]))
