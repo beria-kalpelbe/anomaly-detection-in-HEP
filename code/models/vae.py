@@ -112,3 +112,32 @@ class VAE(nn.Module):
         recon_loss = torch.mean(torch.pow(recon_x - x, 2)) #/ BATCH_SIZE
         kl_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp()) #/ BATCH_SIZE
         return (1-beta)*recon_loss + beta*kl_loss
+
+
+class AE(nn.Module):
+    def __init__(self, input_dim, latent_dim, dropout_rate=0.1):
+        super(AE, self).__init__()
+
+        self.fc1 = nn.Linear(in_features=input_dim, out_features=512)
+        self.fc2 = nn.Linear(in_features=512, out_features=latent_dim)
+        self.fc3 = nn.Linear(in_features=latent_dim, out_features=512)
+        self.fc4 = nn.Linear(in_features=512, out_features=input_dim)
+        self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
+        self.dropout = nn.Dropout(dropout_rate)
+
+    def encode(self, x):
+        h1 = self.dropout(self.relu(self.fc1(x)))
+        return self.dropout(self.fc2(h1))
+
+    def decode(self, z):
+        h3 = self.relu(self.fc3(z))
+        return self.tanh(self.dropout(self.fc4(h3)))
+
+    def forward(self, x):
+        z = self.encode(x)
+        return self.decode(z)
+
+    def loss_function(self, recon_x, x):
+        recon_loss = torch.mean(torch.pow(recon_x - x, 2))  # Mean Squared Error Loss
+        return recon_loss

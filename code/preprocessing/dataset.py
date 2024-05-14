@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 import h5py
 from google.cloud import storage
 from io import BytesIO
-
+from itertools import chain
 
 
 
@@ -51,7 +51,7 @@ class dataset(Dataset):
                 print(f'Background file: {file_dir}')
             self.bkg_data = d
             data = np.array([list(element) for element in data.tolist()])
-            self.test_data = data
+            self.data_test = data
         if data_file.endswith(".root"):
             print("Using root files:", end=" ")
             data_train = self.get_data_from_root(data_file)
@@ -59,23 +59,27 @@ class dataset(Dataset):
             features = ['Track.PT', 'Track.Eta', 'Track.Phi', 'Track.D0', 'Track.DZ']
             data_ = []
             for i in range(5):
-                d = data_train['Track'][features[i]].array().tolist()
+                d = data_train['Track'][features[i]].array()[:10].tolist()
+                d = list(chain.from_iterable(d))[:100000]
                 data_.append(d)
             data_ = np.array(data_)
             del data_train
-            self.data_train = data_
+            self.data_train = data_.T
         else:
             raise ValueError(f"data_file must be a .h5 or .csv file, not {data_file}")
+        # self.data_train = np.array(self.data_train)
+        print(self.data_train.shape)
+        self.mins = np.min(self.data_train,axis=0)
+        self.maxs = np.max(self.data_train, axis=0)
         self.data_train = self.normalize(self.data_train)
         self.data_train = np.array(self.data_train)
         self.data_test = self.normalize(self.data_test)
         self.split_data()
+        self.num_features = self.data_train.shape[1]
         
     def normalize(self, data):
-        min_vals = np.min(data, axis=0)
-        max_vals = np.max(data, axis=0)
-        data = -1 + 2 * (data - min_vals) / (max_vals - min_vals)
-        return data
+        return (data - self.mins)/(self.maxs - self.mins)
+
         
     def get_data_from_h5(self, file_dir:str, bucket_name:str = 'cuda-programming-406720'):       
         client = storage.Client()
@@ -94,7 +98,7 @@ class dataset(Dataset):
         file_contents = BytesIO(blob.download_as_string())
         tree = uproot.open(file_contents)
         data = tree['Delphes']
-        return data[:10]
+        return data
     
     def split_data(self):
         indices = np.array(range(self.data_train.shape[0]))
@@ -105,9 +109,9 @@ class dataset(Dataset):
         indices_train = indices[:train_size]
         indices_valid = indices[(train_size+1):(train_size + valid_size)]
         # indices_test = indices[(train_size + valid_size+1):]
+        self.data_valid = self.data_train[indices_valid,:]
         self.data_train = self.data_train[indices_train,:]
         # self.labels_train = self.labels[indices_train]
-        self.data_valid = self.data_train[indices_valid,:]
         # self.labels_valid = self.labels[indices_valid]
         # self.data_test = self.data_train[indices_test,:]
         # self.labels_test = self.labels[indices_test]
