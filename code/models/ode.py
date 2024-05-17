@@ -187,10 +187,10 @@ class ode():
         self.bkg_mdn()
                 
     def get_scores(self, data, epsilon=2e-1):
-        logits_sg, means_sg, variances_sg = self.sg_mdn.get_mixture_components(data)
+        logits_sg, means_sg, variances_sg = self.density_signal.get_mixture_components(data)
         p_sg = mog_log_prob(data, logits_sg, means_sg, variances_sg)
         
-        logits_bkg, means_bkg, variances_bkg = self.bkg_mdn.get_mixture_components(data)
+        logits_bkg, means_bkg, variances_bkg = self.density_bkg.get_mixture_components(data)
         p_bkg = mog_log_prob(data, logits_bkg, means_bkg, variances_bkg)
         
         return p_bkg.exp()/(epsilon*p_sg.exp() + (1-epsilon)*p_bkg.exp())
