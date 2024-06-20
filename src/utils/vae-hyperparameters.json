@@ -1,0 +1,10 @@
+{
+    "input_dim": 5,
+    "output_dim": 5,
+    "hidden_dims": [64, 64, 64],
+    "latent_dim": 4,
+    "lr": 1e-3,
+    "batch_size": 100000,
+    "num_epochs": 40,
+    "betas": [0.001, 0.01, 0.05, 0.1, 0.5, 1.0]
+}
