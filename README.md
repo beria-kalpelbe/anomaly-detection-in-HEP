@@ -6,13 +6,6 @@ Anomaly Detection In High Energy Physics Data
 ## Overview
 This study aims to develop a Machine Learning model to detect anomalous events in HighEnergy Physics data. Despite extensive research in this area, experimental physicists still struggle to manage the huge amount of data collected at the Large Hadron Collider. Statistical tools like Z-scores are still widely used by experimental physicists. Many years ago, ML techniques demonstrated their ability to detect anomalies in various types of data, including HEP data. In this study, both supervised techniques (decision trees and multi-layer perceptron) and unsupervised techniques (autoencoders) are explored to detect anomalies in HEP data. The supervised learning methods are utilized to learn the characteristics that differentiate signal events from background events. On the other hand, unsupervised methods learn the distribution that generated background events in order to detect signals when they appear to deviate from the background distribution.
 
-## Table of Contents
-- [Data Preprocessing](#data-preprocessing)
-- [Models](#models)
-    - [Decision Trees (DT)](#decision-trees-dt)
-    - [Multi-Layer Perceptron (MLP)](#multi-layer-perceptron-mlp)
-    - [Autoencoders (AE)](#autoencoders-ae)
-
 ## 1 - Data Preprocessing
 <a href="https://colab.research.google.com/github/beria-kalpelbe/anomaly-detection-in-HEP/blob/main/data_preprocessing.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 In order to prepare the High Energy Physics (HEP) data for anomaly detection, several preprocessing steps are performed. These steps include:
