@@ -15,14 +15,15 @@ In order to prepare the High Energy Physics (HEP) data for anomaly detection, se
 - Save the datasets in a .h5 file
 
 ## 2 - Supervised anomaly detection
-### 2.1 - Decision Trees (DT) <a href="https://colab.research.google.com/drive/1jbiMsVrCthzuic9FspT8FYdy8a8qd7xU" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+### 2.1 - Decision Trees <a href="https://colab.research.google.com/drive/1jbiMsVrCthzuic9FspT8FYdy8a8qd7xU" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 Decision Trees are a supervised learning algorithm used for classification and regression tasks. In the context of anomaly detection in HEP data, decision trees can be trained to learn the characteristics that differentiate signal events from background events. 
 
-### 2.2 - Multi-Layer Perceptron (MLP)
+### 2.2 - Multi-Layer Perceptron <a href="https://colab.research.google.com/drive/1MudoIij-ICD5RxRYaYyiEOooi8aqj0eD?authuser=1#scrollTo=F7dRgY3IjtmC" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 Multi-Layer Perceptron is a type of artificial neural network that consists of multiple layers of interconnected nodes. MLPs have been widely used for various machine learning tasks, including anomaly detection. 
 
 ## 3 - Unsupervised anomaly detection
-### 3.1 - Autoencoders (AE)
+### 3.1 - Autoencoders <a href="https://colab.research.google.com/drive/1idnyU8BpXibuaV-po4UDstBV_2KRG3-E" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 Autoencoders are unsupervised learning models that are commonly used for dimensionality reduction and anomaly detection. In the context of anomaly detection in HEP data, autoencoders can be trained to learn the distribution that generated background events and detect signals when they deviate from the background distribution. 
 
-### 3.2 - Variational Autoencoders (VAE)
+### 3.2 - Variational Autoencoders <a href="https://colab.research.google.com/drive/1XMF86VdMCQZkLJNQXps-P20JUSo0M9px" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+Variational Autoencoders (VAEs) are a type of generative model that extend the basic autoencoder architecture. Unlike traditional autoencoders, which learn a deterministic mapping from input to latent space, VAEs learn a probabilistic distribution in the latent space. The encoder network learns to map the input data to the parameters of a probability distribution (typically a Gaussian distribution), and the decoder network learns to generate new samples from this latent distribution. This allows VAEs to generate new samples that are similar to the training data, making them useful for tasks such as data generation and synthesis. VAEs can also be used for anomaly detection, where samples that deviate significantly from the learned latent distribution are identified as anomalies.
