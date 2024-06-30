@@ -115,4 +115,11 @@ class dataset:
                 return self.X_test[self.y_test == 1, :]
             else:
                 return self.X_test[self.y_test == 1,:][:size, :]
-    
+        
+        def get_treated_test_set(self):
+            min_bkg = self.get_test_background()[:, 1].min()
+            max_bkg = self.get_test_background()[:, 1].max()
+            mask = (self.X_test[:,1] < max_bkg) & (self.X_test[:,1] > min_bkg)
+            X_test_resized = self.X_test[mask, :]
+            y_test_resized = self.X_test[mask]
+            return X_test_resized, y_test_resized

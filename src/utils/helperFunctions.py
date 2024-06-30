@@ -39,12 +39,10 @@ def plot_confusion_matrix(y_true, y_pred, model_name, savefig:bool=False):
     cm = confusion_matrix(y_true, y_pred)
     accuracy = accuracy_score(y_true, y_pred)
     print(f'Accuracy: {accuracy*100:.2f}%')
-    print('Confusion matrix:')
     plt.figure(figsize=(8,6))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Background", "Signal"], yticklabels=["Background", "Signal"])
     plt.xlabel("Predicted labels")
     plt.ylabel("True labels")
-    print('accuracy: {:.3f}%'.format(accuracy*100))
     if savefig:
         plt.savefig(f'plots/{model_name}/{model_name}-confusion-matrix.pdf', format='pdf')
     plt.show()
@@ -71,4 +69,22 @@ def plot_sic(y_true, y_scores, label='SIC curve'):
     plt.plot(tpr, tpr/np.sqrt(fpr), lw=2, label=label)
     plt.xlabel(r"$\varepsilon_S$")
     plt.ylabel(r"$\varepsilon_S/\sqrt{\varepsilon_B}$")
+    plt.xscale('log')
+    plt.yscale('log')
     plt.show()
+    
+def calculate_metrics(y_true, y_pred):
+    accuracy = accuracy_score(y_true, y_pred)
+    true_positive = np.sum(np.logical_and(y_true == 1, y_pred == 1))
+    false_positive = np.sum(np.logical_and(y_true == 0, y_pred == 1))
+    false_negative = np.sum(np.logical_and(y_true == 1, y_pred == 0))
+    true_negative = np.sum(np.logical_and(y_true == 0, y_pred == 0))
+
+    fpr = false_positive / (false_positive + true_negative)
+    fnr = false_negative / (true_positive + false_negative)
+
+    precision = true_positive / (true_positive + false_positive)
+    recall = true_positive / (true_positive + false_negative)
+    f1_score = 2 * (precision * recall) / (precision + recall)
+
+    return accuracy, fpr, fnr, f1_score
