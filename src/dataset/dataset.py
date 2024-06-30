@@ -4,7 +4,6 @@ import h5py
 import numpy as np
 
 class dataset:
-    class dataset:
         """
         A class for loading and accessing dataset for anomaly detection in High Energy Physics (HEP).
         """

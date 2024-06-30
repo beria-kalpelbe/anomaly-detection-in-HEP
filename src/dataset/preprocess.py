@@ -184,33 +184,33 @@ class preprocess:
             print(f"Background - Mean: {background_mean}")
             print(f"Background - Std: {background_std}")
 
-    def plot_hists(self, set: str, log_scale: bool = True, size_of_data_to_plot: int = 5000, savefig: str = None, bins:list[int] = [100, 100, 100, 100, 100]):
+    def plot_hists(self, subset: str, log_scale: bool = True, size_of_data_to_plot: int = 100_000, savefig: str = None, bins:list[int] = [100, 100, 100, 100, 100]):
         """
         Plots histograms for the specified dataset.
 
         Parameters:
-        - set (str): The dataset to plot histograms for. Supported values are 'signal', 'background', and 'all'.
+        - subset (str): The dataset to plot histograms for. Supported values are 'signal', 'background', and 'all'.
         - log_scale (bool): Whether to use a logarithmic scale for the y-axis. Default is True.
         - size_of_data_to_plot (int): The number of data points to plot. Default is 5000.
         - savefig (str): The file path to save the plot as an image. If None, the plot will be displayed on the screen. Default is None.
         """
 
         xlabels = [r'$p_T$', r'$\eta$', r'$\phi$', r'$d_0$', r'$d_z$']
-        if set == 'signal':
+        if subset == 'signal':
             data = self.signal_data[:size_of_data_to_plot, :]
-        elif set == 'background':
+        elif subset == 'background':
             data = self.background_data[:size_of_data_to_plot, :]
-        elif set == 'all':
+        elif subset == 'all':
             data = self.signal_data[:size_of_data_to_plot // 2, :]
             data2 = self.background_data[:size_of_data_to_plot // 2, :]
         else:
-            raise ValueError("Invalid set. Only 'signal', 'background', and 'all' are supported.")
+            raise ValueError("Invalid subset. Only 'signal', 'background', and 'all' are supported.")
 
         fig, axes = plt.subplots(1, 5, figsize=(20, 4))
         for i in range(len(self.features)):
-            if set == 'all':
-                sns.histplot(data[:, i], ax=axes[i], bins=bins[i], element="step", fill=False, stat="density", log_scale=log_scale, label='Signal')
-                sns.histplot(data2[:, i], ax=axes[i], bins=bins[i], element="step", fill=False, stat="density", log_scale=log_scale, label='Background')
+            if subset == 'all':
+                sns.histplot(data[:, i], ax=axes[i], bins=bins[i], element="step", fill=True, alpha=0.3, stat="density", log_scale=log_scale, label='Signal')
+                sns.histplot(data2[:, i], ax=axes[i], bins=bins[i], element="step", fill=True, alpha=0.3, stat="density", log_scale=log_scale, label='Background')
                 axes[0].legend(fontsize=8)
             else:
                 sns.histplot(data[:, i], ax=axes[i], bins=bins[i], element="step", fill=False, stat="density", log_scale=log_scale)
@@ -234,9 +234,9 @@ class preprocess:
         """
         data = torch.cat((self.signal_data[:(self.data_size//2), :], self.background_data[:(self.data_size//2), :]), dim=0)
         np.random.seed(random_state)
-        np.random.shuffle(data)
-        X = data[:,:5]
-        y = data[:,-1]
+        # np.random.shuffle(data)
+        X = data[:,:5].numpy()
+        y = data[:,-1].numpy()
         self.X_train, X_remain, self.y_train, y_remain  = train_test_split(
             X,y, test_size=test_size, random_state=random_state
             )

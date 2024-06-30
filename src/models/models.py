@@ -1,6 +1,8 @@
 from sklearn.tree import DecisionTreeClassifier
 import torch
 import torch.nn as nn
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class DecisionTreeModel:
@@ -48,6 +50,19 @@ class DecisionTreeModel:
             array-like: The predicted class probabilities.
         """
         return self.model.predict_proba(X_test)
+    
+    def importance_plot(self, savefig: str=None):
+        importances = self.model.feature_importances_
+        indices = np.argsort(importances)[::-1]
+        feature_names=[r'$pT$', r'$\eta$', r'$\phi$', r'$d_0$', r'$d_z$']
+        plt.figure(figsize=(10, 6))
+        plt.bar(range(5), importances[indices]*100, align='center')
+        plt.xticks(range(5), [feature_names[i] for i in indices], rotation=0)
+        plt.xlim([-1, 5])
+        plt.ylabel('Importance (%)')
+        if savefig is not None:
+            plt.savefig(savefig)
+        plt.show()
     
 
 class MLP(nn.Module):
