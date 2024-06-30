@@ -31,7 +31,7 @@ class preprocess:
                  data_size:int = 12_500_000):
         self.features = features
         self.bucket_name = bucket_name
-        self.read_data(signal_files, background_file)
+        self._read_data(signal_files, background_file)
     
     def _get_data_from_root(self, file_dir:str):
         """
@@ -68,6 +68,7 @@ class preprocess:
         with h5py.File(file_contents, 'r') as f:
             dataset = f['Track']
             d = dataset[:]
+        d = torch.tensor([list(d[i]) for i in range(d.shape[0])])
         return d
     
     def select_data_in_root_data(self, data):
@@ -120,7 +121,7 @@ class preprocess:
         Returns:
             concatenated_data: Preprocessed concatenated signal data.
         """
-        concatenated_data = np.array([])
+        concatenated_data = torch.tensor([])
         for file_dir in file_dirs:
             if file_dir.endswith('.root'):
                 data = self._get_data_from_root(file_dir)
@@ -129,8 +130,8 @@ class preprocess:
                 data = self._get_data_from_h5(file_dir)
             else:
                 raise ValueError("Invalid file format. Only .root and .h5 files are supported.")
-            concatenated_data = np.concatenate((concatenated_data, data))
-        concatenated_data = torch.tensor(concatenated_data)
+            concatenated_data = torch.concatenate((concatenated_data, data))
+        # concatenated_data = torch.tensor(concatenated_data)
         concatenated_data = torch.concatenate((concatenated_data, torch.tensor([[1]]*concatenated_data.shape[0])), axis=1)
         concatenated_data[:, 0] = concatenated_data[:, 0] * 1000 # convert GeV to MeV
         return concatenated_data
@@ -144,8 +145,10 @@ class preprocess:
             signal_files (list): List of file paths of the signal data.
             background_file (str): File path of the background data.
         """
-        self.signal_data = self._read_signal_data(signal_files)
+        print('reading background dataset......')
         self.background_data = self._read_background_data(background_file, self.features)
+        print('reading signal dataset......')
+        self.signal_data = self._read_signal_data(signal_files)
         
     
     def print_desc_stats(self) -> None:
