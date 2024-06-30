@@ -6,6 +6,9 @@ import uproot
 import torch
 from itertools import chain
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.ticker as ticker
 
 
 
@@ -32,6 +35,7 @@ class preprocess:
         self.features = features
         self.bucket_name = bucket_name
         self._read_data(signal_files, background_file)
+        self.data_size = data_size
     
     def _get_data_from_root(self, file_dir:str):
         """
@@ -157,6 +161,7 @@ class preprocess:
         """
         data = torch.cat((self.signal_data, self.background_data), dim=0)
         for i in range(len(self.features)):
+            print('+------------------------------------------------------------------------------------+')
             feature_values = data[:, i]
             feature_mean = torch.mean(feature_values)
             feature_std = torch.std(feature_values)
@@ -168,7 +173,6 @@ class preprocess:
             signal_values = data[data[:, -1] == 1, i]
             signal_mean = torch.mean(signal_values)
             signal_std = torch.std(signal_values)
-            print(f"Feature: {self.features[i]}")
             print(f"Signal - Range: [{torch.min(signal_values)}, {torch.max(signal_values)}]")
             print(f"Signal - Mean: {signal_mean}")
             print(f"Signal - Std: {signal_std}")
@@ -180,6 +184,45 @@ class preprocess:
             print(f"Background - Mean: {background_mean}")
             print(f"Background - Std: {background_std}")
 
+    def plot_hists(self, set: str, log_scale: bool = True, size_of_data_to_plot: int = 5000, savefig: str = None):
+        """
+        Plots histograms for the specified dataset.
+
+        Parameters:
+        - set (str): The dataset to plot histograms for. Supported values are 'signal', 'background', and 'all'.
+        - log_scale (bool): Whether to use a logarithmic scale for the y-axis. Default is True.
+        - size_of_data_to_plot (int): The number of data points to plot. Default is 5000.
+        - savefig (str): The file path to save the plot as an image. If None, the plot will be displayed on the screen. Default is None.
+        """
+
+        xlabels = [r'$p_T$', r'$\eta$', r'$\phi$', r'$d_0$', r'$d_z$']
+        if set == 'signal':
+            data = self.signal_data[:size_of_data_to_plot, :]
+        elif set == 'background':
+            data = self.background_data[:size_of_data_to_plot, :]
+        elif set == 'all':
+            data = self.signal_data[:size_of_data_to_plot // 2, :]
+            data2 = self.background_data[:size_of_data_to_plot // 2, :]
+        else:
+            raise ValueError("Invalid set. Only 'signal', 'background', and 'all' are supported.")
+
+        fig, axes = plt.subplots(1, 5, figsize=(20, 4))
+        for i in range(len(self.features)):
+            if set == 'all':
+                sns.histplot(data[:, i], ax=axes[i], bins=100, element="step", fill=False, stat="density", log_scale=log_scale, label='Signal')
+                sns.histplot(data2[:, i], ax=axes[i], bins=100, element="step", fill=False, stat="density", log_scale=log_scale, label='Background')
+                axes[0].legend(fontsize=8)
+            else:
+                sns.histplot(data[:, i], ax=axes[i], bins=100, element="step", fill=False, stat="density", log_scale=log_scale)
+            axes[i].yaxis.set_major_formatter(ticker.ScalarFormatter('%.1f'))
+            axes[i].set_xlabel(xlabels[i], fontsize=10)
+
+        plt.subplots_adjust(wspace=0.4, hspace=0.2)
+        if savefig is not None:
+            plt.savefig(savefig)
+        fig.show()
+    
+    
 
     def _split_data(self, test_size:float=0.2, random_state:int=45):
         """
