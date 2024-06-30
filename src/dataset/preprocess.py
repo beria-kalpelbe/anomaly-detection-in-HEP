@@ -184,7 +184,7 @@ class preprocess:
             print(f"Background - Mean: {background_mean}")
             print(f"Background - Std: {background_std}")
 
-    def plot_hists(self, set: str, log_scale: bool = True, size_of_data_to_plot: int = 5000, savefig: str = None):
+    def plot_hists(self, set: str, log_scale: bool = True, size_of_data_to_plot: int = 5000, savefig: str = None, bins:list[int] = [100, 100, 100, 100, 100]):
         """
         Plots histograms for the specified dataset.
 
@@ -209,12 +209,12 @@ class preprocess:
         fig, axes = plt.subplots(1, 5, figsize=(20, 4))
         for i in range(len(self.features)):
             if set == 'all':
-                sns.histplot(data[:, i], ax=axes[i], bins=100, element="step", fill=False, stat="density", log_scale=log_scale, label='Signal')
-                sns.histplot(data2[:, i], ax=axes[i], bins=100, element="step", fill=False, stat="density", log_scale=log_scale, label='Background')
+                sns.histplot(data[:, i], ax=axes[i], bins=bins[i], element="step", fill=False, stat="density", log_scale=log_scale, label='Signal')
+                sns.histplot(data2[:, i], ax=axes[i], bins=bins[i], element="step", fill=False, stat="density", log_scale=log_scale, label='Background')
                 axes[0].legend(fontsize=8)
             else:
-                sns.histplot(data[:, i], ax=axes[i], bins=100, element="step", fill=False, stat="density", log_scale=log_scale)
-            axes[i].yaxis.set_major_formatter(ticker.ScalarFormatter('%.1f'))
+                sns.histplot(data[:, i], ax=axes[i], bins=bins[i], element="step", fill=False, stat="density", log_scale=log_scale)
+            axes[i].yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
             axes[i].set_xlabel(xlabels[i], fontsize=10)
 
         plt.subplots_adjust(wspace=0.4, hspace=0.2)
